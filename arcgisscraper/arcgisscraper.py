@@ -6,8 +6,19 @@ from typing import List, Dict, Optional
 
 
 class ArcGISScraper:
-    def __init__(
-        self,
+    """
+    ArcGIS REST API scraper.
+
+    Features:
+    - Scrape single or multiple layers
+    - Configurable pagination and rate limiting
+    - Token-based authentication for secured services
+    - Exports to CSV, JSON, or Parquet
+    - Automatic retries with exponential backoff
+    - Metadata fetching (fields, geometry type, spatial reference)
+    - Filtering (where clause, selected fields, geometry)
+    """
+    def __init__(self,
         base_url: str,
         export_directory: str = "./data",
         page_size: int = 1000,
@@ -16,6 +27,18 @@ class ArcGISScraper:
         token: Optional[str] = None,
         max_retries: int = 5,
     ):
+        """
+        Initialize the ArcGISScraper.
+
+        Args:
+            base_url: Base ArcGIS REST service URL.
+            export_directory: Directory where output files will be stored.
+            page_size: Number of records to fetch per request.
+            export_format: Output format (csv, json, parquet).
+            max_requests_per_second: Rate limiting value.
+            token: Optional authentication token for secured services.
+            max_retries: Maximum number of retries for failed requests.
+        """
         self.base_url = base_url.rstrip("/") + "/"
         self.export_directory = export_directory
         self.page_size = page_size
@@ -29,6 +52,7 @@ class ArcGISScraper:
             os.makedirs(self.export_directory)
 
     def _rate_limit(self):
+        """Apply rate limiting based on max_requests_per_second."""
         now = time.time()
         elapsed = now - self._last_request_time
         if elapsed < self.min_delay:
@@ -36,6 +60,7 @@ class ArcGISScraper:
         self._last_request_time = time.time()
 
     def _request(self, url: str, params: Dict) -> Dict:
+        """Perform a GET request with retry and exponential backoff."""
         attempt = 0
         while True:
             try:
@@ -52,19 +77,39 @@ class ArcGISScraper:
                 time.sleep(sleep_time)
 
     def fetch_metadata(self, query_url: str) -> Dict:
+        """
+        Fetch metadata for a given layer.
+
+        Args:
+            query_url: Layer query endpoint (e.g., "LayerName/FeatureServer/0/query").
+
+        Returns:
+            Dictionary containing metadata information about the layer.
+        """
         layer_url = self.base_url + query_url.split("/query")[0]
         params = {"f": "json"}
         if self.token:
             params["token"] = self.token
         return self._request(layer_url, params)
 
-    def _fetch_layer(
-        self,
+    def _fetch_layer(self,
         query_url: str,
         where: str = "1=1",
         out_fields: str = "*",
         geometry: Optional[str] = None,
     ) -> List[Dict]:
+        """
+        Fetch all features from a given layer with pagination.
+
+        Args:
+            query_url: Layer query endpoint.
+            where: SQL where clause to filter results.
+            out_fields: Comma-separated list of fields to return.
+            geometry: Optional geometry filter.
+
+        Returns:
+            List of features in dictionary format.
+        """
         layer_url = self.base_url + query_url
         params = {
             "where": where,
@@ -88,6 +133,13 @@ class ArcGISScraper:
         return all_features
 
     def _export(self, features: List[Dict], filename: str):
+        """
+        Export features to the configured format.
+
+        Args:
+            features: List of features to export.
+            filename: Output filename (without extension).
+        """
         if not features:
             print(f"No data to export for {filename}")
             return
@@ -106,20 +158,35 @@ class ArcGISScraper:
 
         print(f"Exported {filename} ({len(df)} records)")
 
-    def scrape_layer(
-        self,
+    def scrape_layer(self,
         query_url: str,
         filename: Optional[str] = None,
         where: str = "1=1",
         out_fields: str = "*",
         geometry: Optional[str] = None,
     ):
+        """
+        Scrape a single layer and export it to the configured format.
+
+        Args:
+            query_url: Layer query endpoint.
+            filename: Optional output filename (default: layer name).
+            where: SQL where clause to filter results.
+            out_fields: Comma-separated list of fields to return.
+            geometry: Optional geometry filter.
+        """
         features = self._fetch_layer(query_url, where, out_fields, geometry)
         if not filename:
             filename = query_url.split("/")[0]
         self._export(features, filename)
 
     def scrape_layers(self, query_urls: List[str]):
+        """
+        Scrape multiple layers sequentially.
+
+        Args:
+            query_urls: List of query endpoints to scrape.
+        """
         for idx, query_url in enumerate(query_urls, 1):
             print(f"Scraping {idx}/{len(query_urls)}: {query_url}")
             self.scrape_layer(query_url)
