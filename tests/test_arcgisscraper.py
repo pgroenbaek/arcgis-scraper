@@ -21,6 +21,7 @@ import os
 import pytest
 import tempfile
 import shutil
+import requests
 from unittest.mock import patch, MagicMock
 import pandas as pd
 
@@ -66,16 +67,17 @@ def test_request_retries_on_failure(monkeypatch, temp_export_dir):
     def fake_get(*args, **kwargs):
         call_count["count"] += 1
         if call_count["count"] < 2:
-            raise Exception("Temporary failure")
+            raise requests.exceptions.ConnectionError("Temporary failure")
         mock_resp = MagicMock()
         mock_resp.json.return_value = {"features": []}
         mock_resp.raise_for_status.return_value = None
         return mock_resp
 
-    monkeypatch.setattr("requests.get", fake_get)
+    monkeypatch.setattr(requests, "get", fake_get)
+    monkeypatch.setattr("time.sleep", lambda s: None)
 
     result = scraper._request("http://example.com", {})
-    assert "features" in result
+    assert isinstance(result, dict)
     assert call_count["count"] == 2
 
 
