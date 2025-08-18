@@ -5,6 +5,7 @@ setup(
     version="0.0.1b0",
     packages=find_packages(),
     install_requires=[
+        "pandas"
     ],
     author="Peter Grønbæk Andersen",
     author_email="peter@grnbk.io",
