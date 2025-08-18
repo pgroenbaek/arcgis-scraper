@@ -84,7 +84,6 @@ First, install the required dependencies:
 
 ```sh
 pip install pytest
-pip install pytest-dependency
 ```
 
 Then, run tests with:
