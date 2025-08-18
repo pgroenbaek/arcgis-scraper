@@ -21,13 +21,13 @@ pip install --upgrade arcgis-scraper
 If you have downloaded a `.whl` file from the [Releases](https://github.com/pgroenbaek/arcgis-scraper/releases) page, install it with:
 
 ```sh
-pip install path/to/arcgis-scraper‑<version>‑py3‑none‑any.whl
+pip install path/to/arcgis_scraper‑<version>‑py3‑none‑any.whl
 ```
 
 Replace `<version>` with the actual version number in the filename. For example:
 
 ```sh
-pip install path/to/arcgis-scraper-1.0.0-py3-none-any.whl
+pip install path/to/arcgis_scraper-1.0.0-py3-none-any.whl
 ```
 
 ### Install from source
