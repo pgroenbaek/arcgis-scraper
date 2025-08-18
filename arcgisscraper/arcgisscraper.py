@@ -55,13 +55,13 @@ class ArcGISScraper:
         Initialize the ArcGISScraper.
 
         Args:
-            base_url: Base ArcGIS REST service URL.
-            export_directory: Directory where output files will be stored.
-            page_size: Number of records to fetch per request.
-            export_format: Output format (csv, json, parquet).
-            max_requests_per_second: Rate limiting value.
-            token: Optional authentication token for secured services.
-            max_retries: Maximum number of retries for failed requests.
+            base_url (str): Base ArcGIS REST service URL.
+            export_directory (str): Directory where output files will be stored.
+            page_size (int): Number of records to fetch per request.
+            export_format (str): Output format, one of "csv", "json", or "parquet".
+            max_requests_per_second (float): Maximum number of requests per second for rate limiting.
+            token (Optional[str]): Optional authentication token for secured services.
+            max_retries (int): Maximum number of retries for failed requests.
         """
         self.base_url = base_url.rstrip("/") + "/"
         self.export_directory = export_directory
@@ -105,7 +105,7 @@ class ArcGISScraper:
         Fetch metadata for a given layer.
 
         Args:
-            query_url: Layer query endpoint (e.g., "LayerName/FeatureServer/0/query").
+            query_url (str): Layer query endpoint (e.g., "LayerName/FeatureServer/0/query").
 
         Returns:
             Dictionary containing metadata information about the layer.
@@ -126,13 +126,13 @@ class ArcGISScraper:
         Fetch all features from a given layer with pagination.
 
         Args:
-            query_url: Layer query endpoint.
-            where: SQL where clause to filter results.
-            out_fields: Comma-separated list of fields to return.
-            geometry: Optional geometry filter.
+            query_url (str): Layer query endpoint.
+            where (str): SQL where clause to filter results. Default is "1=1".
+            out_fields (str): Comma-separated list of fields to return. Default is "*".
+            geometry (Optional[str]): Optional geometry filter. Defaults to None.
 
         Returns:
-            List of features in dictionary format.
+            List[Dict]: List of features in dictionary format.
         """
         layer_url = self.base_url + query_url
         params = {
@@ -161,8 +161,8 @@ class ArcGISScraper:
         Export features to the configured format.
 
         Args:
-            features: List of features to export.
-            filename: Output filename (without extension).
+            features (List[Dict]): List of features to export.
+            filename (str): Output filename (without extension).
         """
         if not features:
             print(f"No data to export for {filename}")
@@ -193,11 +193,11 @@ class ArcGISScraper:
         Scrape a single layer and export it to the configured format.
 
         Args:
-            query_url: Layer query endpoint.
-            filename: Optional output filename (default: layer name).
-            where: SQL where clause to filter results.
-            out_fields: Comma-separated list of fields to return.
-            geometry: Optional geometry filter.
+            query_url (str): Layer query endpoint.
+            filename (Optional[str]): Optional output filename (default: layer name).
+            where (str): SQL where clause to filter results.
+            out_fields (str): Comma-separated list of fields to return.
+            geometry (Optional[str]): Optional geometry filter.
         """
         features = self._fetch_layer(query_url, where, out_fields, geometry)
         if not filename:
@@ -209,7 +209,7 @@ class ArcGISScraper:
         Scrape multiple layers sequentially.
 
         Args:
-            query_urls: List of query endpoints to scrape.
+            query_urls (List[str]): List of query endpoints to scrape.
         """
         for idx, query_url in enumerate(query_urls, 1):
             print(f"Scraping {idx}/{len(query_urls)}: {query_url}")
