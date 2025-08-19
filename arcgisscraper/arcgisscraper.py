@@ -31,16 +31,29 @@ from typing import List, Dict, Optional
 
 class ArcGISScraper:
     """
-    ArcGIS REST API scraper.
+    A scraper for retrieving data from ArcGIS REST API FeatureServer/MapServer layers.
+
+    This class handles querying, pagination, retries, rate limiting, and data export,
+    making it easier to work with ArcGIS services in Python.
 
     Features:
-    - Scrape single or multiple layers
-    - Configurable pagination and rate limiting
-    - Token-based authentication for secured services
-    - Exports to CSV, JSON, or Parquet
-    - Automatic retries with exponential backoff
-    - Metadata fetching (fields, geometry type, spatial reference)
-    - Filtering (where clause, selected fields, geometry)
+        - Scrape single or multiple layers
+        - Configurable pagination and rate limiting
+        - Token-based authentication for secured services
+        - Export to CSV, JSON, or Parquet
+        - Automatic retries with exponential backoff
+        - Metadata fetching (fields, geometry type, spatial reference)
+        - Filtering via SQL where clauses, field selection, and geometry filters
+
+    Example:
+        >>> scraper = ArcGISScraper(
+        ...     base_url="https://services.arcgis.com/example/arcgis/rest/services/",
+        ...     export_directory="./data",
+        ...     export_format="csv",
+        ...     max_requests_per_second=1.0,
+        ... )
+        >>> scraper.scrape_layer("MyLayer/FeatureServer/0/query", where="POPULATION > 1000")
+
     """
     def __init__(self,
         base_url: str,
