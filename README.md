@@ -27,7 +27,7 @@ pip install path/to/arcgis_scraper‑<version>‑py3‑none‑any.whl
 Replace `<version>` with the actual version number in the filename. For example:
 
 ```sh
-pip install path/to/arcgis_scraper-1.0.0-py3-none-any.whl
+pip install path/to/arcgis_scraper-1.0.1-py3-none-any.whl
 ```
 
 ### Install from source
